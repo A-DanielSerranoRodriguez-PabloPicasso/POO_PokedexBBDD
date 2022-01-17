@@ -1,57 +1,75 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
-public class UserDAO {
-	private static final String DB_URL = "jdbc:mysql://localhost/Pokedex";
-	private static final String USER = "pokedex";
-	private static final String PASSWD = "pokedex";
-//	private static final String QUERY_PKMN;
-
+public class UserDAO extends AbstractDAO{
 	public UserDAO() {
-	}
-
-	private Connection databaseConn() {
-		try {
-			return DriverManager.getConnection(DB_URL, USER, PASSWD);
-		} catch (SQLException e) {
-			return null;
-		}
+		super();
 	}
 
 	public boolean login(String username, String passwd) {
-		try (Connection conn = databaseConn();
-				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("select passwd from users where username='" + username + "';");) {
+		try (ResultSet rs = getUserPasswd(username)) {
 			while (rs.next()) {
 				if (rs.getString("passwd").equals(passwd))
 					return true;
 			}
-			return false;
 		} catch (SQLException e) {
 //			e.printStackTrace();
 			return false;
 		}
+		return false;
 	}
 
 	public boolean register(String username, String passwd) {
-		try (Connection conn = databaseConn();
-				Statement stmt = conn.createStatement();
-				ResultSet check = stmt.executeQuery("select username from users where username='" + username + "';");) {
-			// Comprobamos que hay resultados en el check. Si los hay, devolvemos null
-			while (check.next()) {
-				if (check.getString("username").equals(username))
-					return false;
+		try (ResultSet check = getUser(username);) {
+			if (!userExists(check, username)) {
+				insertUser(username, passwd);
+				return true;
 			}
-			stmt.executeUpdate("insert into users(username, passwd) values ('" + username + "','" + passwd + "');");
-			return true;
 		} catch (SQLException e) {
 //			e.printStackTrace();
 			return false;
+		}
+		return false;
+	}
+
+	private ResultSet getUser(String username) {
+		try {
+			return createStatement().executeQuery("select username from users where username='" + username + "';");
+		} catch (SQLException e) {
+//			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private boolean userExists(ResultSet check, String username) {
+		try {
+			while (check.next()) {
+				if (check.getString("username").equals(username))
+					return true;
+			}
+		} catch (SQLException e) {
+//			e.printStackTrace();
+		}
+		return false;
+	}
+
+	private ResultSet getUserPasswd(String username) {
+		try {
+			return createStatement().executeQuery("select passwd from users where username='" + username + "';");
+		} catch (SQLException e) {
+//			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private void insertUser(String username, String passwd) {
+		try {
+			createStatement()
+					.executeUpdate("insert into users(username, passwd) values ('" + username + "','" + passwd + "');");
+		} catch (SQLException e) {
+//			e.printStackTrace();
 		}
 	}
 }

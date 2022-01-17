@@ -1,7 +1,5 @@
 package models;
 
-import utils.Almacen;
-
 public class Pokemon {
 	private TiposPokemon tipo1, tipo2;
 	private String nombre, categoria, habilidad;
@@ -23,6 +21,10 @@ public class Pokemon {
 		this.peso = peso;
 		this.conocido = conocido;
 	}
+	
+	public Pokemon() {
+		
+	}
 
 	// Getters - Setters
 	public String getTipo1() {
@@ -34,7 +36,10 @@ public class Pokemon {
 	}
 
 	public String getTipo2() {
-		return this.tipo2.name();
+		if (this.tipo2 != null)
+			return this.tipo2.name();
+		else
+			return null;
 	}
 
 	public void setTipo2(TiposPokemon tipo2) {
@@ -110,22 +115,6 @@ public class Pokemon {
 		this.altura = altura;
 		this.peso = peso;
 		this.conocido = true;
-	}
-
-	/**
-	 * Devuelve la posicion del pokemon en el ArrayList.
-	 * 
-	 * @param pokemon Objeto 'Pokemon' del que queremos conseguir la posicion.
-	 * @return Entero que representa la posicion. Si es -1, el pokemon no esta en el
-	 *         ArrayList.
-	 */
-	public int getPosition(Pokemon pokemon) {
-		for (int i = 0; i < Almacen.pokemons.size(); i++) {
-			if (Almacen.pokemons.get(i).getNumeroPokedex() == pokemon.getNumeroPokedex()) {
-				return i;
-			}
-		}
-		return -1;
 	}
 
 	// toString
